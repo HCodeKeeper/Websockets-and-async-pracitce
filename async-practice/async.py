@@ -94,9 +94,43 @@ async def async_release_control():
         return
     
 
+# We can wait whenever we want or dont wait at all
+async def with_create_task():
+    async def func():
+        print("started rawring")
+        start = time()
+        await asyncio.sleep(1)
+        print("rawr")
+        return start
+    res1 = asyncio.create_task(func())
+    res2 = asyncio.create_task(func())
+    res1.add_done_callback(lambda future: print(future.result(), time() - future.result()))
+    res2.add_done_callback(lambda future: print(future.result(), time() - future.result()))
+    sleep(1)
+    print("Slept 1 sec in sync")
+    print("Going for a 4 sec async sleep")
+    await asyncio.sleep(4)
+    print("Slept 4 sec in async")
+
+
+async def storing_coroutines():
+    async def handler1(data):
+        await asyncio.sleep(1)
+    async def handler2(data):
+        await asyncio.sleep(1)
+    
+    data="aasgkjlajsglk"
+    if data:
+        handlers = [handler1(data), handler2(data)]
+        start = time()
+        await asyncio.gather(*handlers)
+        print(time() - start)
+    
 
 if __name__ == '__main__':
     #async_without_lock_releasing()
 
     # .run CREATES NEW EVENT LOOP! WATCH OUT AS IT WILL CREATE PROBLEMS WITH TYING FUTURES. And is designed for running from the main thread on function like main, which encapsulates everything
-    asyncio.run(async_release_control())
+    #asyncio.run(async_release_control())
+    #asyncio.run(with_create_task())
+    asyncio.run(storing_coroutines())
